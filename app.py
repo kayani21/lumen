@@ -70,19 +70,22 @@ st.markdown("""
         width: 100%; height: 100%;
         pointer-events: none;
         z-index: 1;
+        filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.9));
         background-image:
-            radial-gradient(2px 2px at 100px 80px, #FBBF24, transparent),
-            radial-gradient(2px 2px at 300px 200px, #FFFFFF, transparent),
-            radial-gradient(2px 2px at 500px 50px, #FBBF24, transparent),
-            radial-gradient(2px 2px at 700px 250px, #FFFFFF, transparent),
-            radial-gradient(2px 2px at 900px 150px, #F59E0B, transparent),
-            radial-gradient(2px 2px at 1100px 100px, #FFFFFF, transparent),
-            radial-gradient(2px 2px at 200px 350px, #FBBF24, transparent),
-            radial-gradient(2px 2px at 600px 400px, #FFFFFF, transparent),
-            radial-gradient(2px 2px at 1000px 380px, #F59E0B, transparent);
+            radial-gradient(3px 3px at 100px 80px, #FBBF24, transparent),
+            radial-gradient(3px 3px at 300px 200px, #FFFFFF, transparent),
+            radial-gradient(4px 4px at 500px 50px, #FBBF24, transparent),
+            radial-gradient(3px 3px at 700px 250px, #FFFFFF, transparent),
+            radial-gradient(4px 4px at 900px 150px, #F59E0B, transparent),
+            radial-gradient(3px 3px at 1100px 100px, #FFFFFF, transparent),
+            radial-gradient(4px 4px at 200px 350px, #FBBF24, transparent),
+            radial-gradient(3px 3px at 600px 400px, #FFFFFF, transparent),
+            radial-gradient(4px 4px at 1000px 380px, #F59E0B, transparent),
+            radial-gradient(3px 3px at 400px 150px, #FFFFFF, transparent),
+            radial-gradient(4px 4px at 800px 320px, #FBBF24, transparent);
         background-repeat: repeat;
         background-size: 1200px 500px;
-        animation: drift-medium 180s linear infinite;
+        animation: drift-medium 120s linear infinite;
     }
     @keyframes drift-slow {
         from { transform: translateY(0); }
