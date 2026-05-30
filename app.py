@@ -3,20 +3,17 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
 from langchain_anthropic import ChatAnthropic
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_voyageai import VoyageAIEmbeddings
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 import tempfile
 import os
 
-# Page setup
 st.set_page_config(page_title="Lumen", page_icon="✨", layout="centered")
 
-# ---- ATMOSPHERIC STARFIELD ----
 st.markdown("""
 <style>
-    /* Deep space base with subtle nebula glow */
     .stApp {
         background:
             radial-gradient(ellipse at 20% 30%, rgba(139, 92, 246, 0.18) 0%, transparent 50%),
@@ -24,15 +21,11 @@ st.markdown("""
             radial-gradient(ellipse at 50% 100%, rgba(236, 72, 153, 0.10) 0%, transparent 60%),
             #0A0A14;
     }
-
-    /* Star layer 1 (small, far away) */
     .stApp::before {
         content: '';
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
         pointer-events: none;
         z-index: 0;
         background-image:
@@ -63,17 +56,12 @@ st.markdown("""
         background-repeat: repeat;
         background-size: 1200px 300px;
         animation: drift-slow 300s linear infinite;
-        opacity: 1;
     }
-
-    /* Star layer 2 (medium, with glow) */
     .stApp::after {
         content: '';
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
         pointer-events: none;
         z-index: 1;
         background-image:
@@ -89,9 +77,7 @@ st.markdown("""
         background-repeat: repeat;
         background-size: 1200px 500px;
         animation: drift-medium 180s linear infinite;
-        opacity: 1;
     }
-
     @keyframes drift-slow {
         from { transform: translateY(0); }
         to { transform: translateY(-3000px); }
@@ -100,14 +86,7 @@ st.markdown("""
         from { transform: translateY(0); }
         to { transform: translateY(-3000px); }
     }
-
-    /* Make all main content sit ABOVE the star layers */
-    .main .block-container {
-        position: relative;
-        z-index: 10;
-    }
-
-    /* Glowing header card */
+    .main .block-container { position: relative; z-index: 10; }
     .lumen-header {
         background: linear-gradient(135deg, rgba(20, 20, 35, 0.85) 0%, rgba(10, 10, 20, 0.85) 100%);
         backdrop-filter: blur(12px);
@@ -130,7 +109,6 @@ st.markdown("""
         background-clip: text;
         margin: 0;
         letter-spacing: -0.02em;
-        text-shadow: 0 0 60px rgba(251, 191, 36, 0.3);
     }
     .lumen-tagline {
         font-size: 1.1rem;
@@ -143,10 +121,7 @@ st.markdown("""
         font-size: 0.875rem;
         color: #9CA3AF;
         margin-top: 0.75rem;
-        font-weight: 400;
     }
-
-    /* Frosted glass effect */
     [data-testid="stFileUploader"] {
         background: rgba(20, 20, 35, 0.7);
         backdrop-filter: blur(10px);
@@ -165,14 +140,10 @@ st.markdown("""
         backdrop-filter: blur(10px);
         border: 1px solid rgba(251, 191, 36, 0.15) !important;
     }
-
-    /* Hide ONLY Streamlit's own branding (not all headers) */
     #MainMenu {visibility: hidden;}
     [data-testid="stToolbar"] {visibility: hidden;}
     [data-testid="stDecoration"] {visibility: hidden;}
     [data-testid="stStatusWidget"] {visibility: hidden;}
-
-    /* Custom footer */
     .lumen-footer {
         text-align: center;
         margin-top: 3rem;
@@ -183,18 +154,11 @@ st.markdown("""
         position: relative;
         z-index: 10;
     }
-    .lumen-footer a {
-        color: #FBBF24;
-        text-decoration: none;
-    }
-    .lumen-footer a:hover {
-        color: #F59E0B;
-        text-decoration: underline;
-    }
+    .lumen-footer a { color: #FBBF24; text-decoration: none; }
+    .lumen-footer a:hover { color: #F59E0B; text-decoration: underline; }
 </style>
 """, unsafe_allow_html=True)
 
-# ---- HEADER ----
 st.markdown("""
 <div class="lumen-header">
     <h1 class="lumen-title">✨ Lumen</h1>
@@ -209,15 +173,18 @@ try:
 except (KeyError, FileNotFoundError):
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
 
+try:
+    voyage_key = st.secrets["VOYAGE_API_KEY"]
+except (KeyError, FileNotFoundError):
+    voyage_key = os.environ.get("VOYAGE_API_KEY", "")
+
 if not api_key:
-    api_key = st.text_input(
-        "Enter your Anthropic API key:",
-        type="password",
-        help="Get one free at console.anthropic.com"
-    )
+    api_key = st.text_input("Enter your Anthropic API key:", type="password", help="Get one at console.anthropic.com")
 
 if api_key:
     os.environ["ANTHROPIC_API_KEY"] = api_key
+if voyage_key:
+    os.environ["VOYAGE_API_KEY"] = voyage_key
 
 # ---- SESSION STATE ----
 if "question_count" not in st.session_state:
@@ -240,7 +207,10 @@ if uploaded_file and api_key:
         splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
         chunks = splitter.split_documents(docs)
 
-        embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+        embeddings = VoyageAIEmbeddings(
+            voyage_api_key=os.environ.get("VOYAGE_API_KEY", ""),
+            model="voyage-3-lite"
+        )
         vectorstore = Chroma.from_documents(chunks, embeddings)
         retriever = vectorstore.as_retriever()
 
@@ -273,7 +243,6 @@ if uploaded_file and api_key:
     if questions_left > 0:
         st.caption(f"💫 You have {questions_left} free question(s) left this session.")
         question = st.text_input("💬 Ask a question about your document:")
-
         if question:
             with st.spinner("✨ Thinking..."):
                 try:
@@ -284,12 +253,8 @@ if uploaded_file and api_key:
                 except Exception as e:
                     st.error(f"Something went wrong: {str(e)}")
     else:
-        st.warning(
-            "You've reached the free question limit for this session. "
-            "Refresh the page to start over, or enter your own Anthropic API key for unlimited use."
-        )
+        st.warning("You've reached the free question limit for this session. Refresh the page to start over, or enter your own Anthropic API key for unlimited use.")
 
-# ---- FOOTER ----
 st.markdown("""
 <div class="lumen-footer">
     Built by <strong>Kayla Williams</strong> ·
