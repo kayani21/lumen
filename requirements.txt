@@ -10,3 +10,4 @@ pypdf
 anthropic
 voyageai
 langchain-voyageai
+protobuf<5
