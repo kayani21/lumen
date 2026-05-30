@@ -1,14 +1,19 @@
 import streamlit as st
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_chroma import Chroma
-from langchain_anthropic import ChatAnthropic
-from langchain_voyageai import VoyageAIEmbeddings
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
-from langchain_core.output_parsers import StrOutputParser
-import tempfile
 import os
+
+try:
+    from langchain_community.document_loaders import PyPDFLoader
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+    from langchain_chroma import Chroma
+    from langchain_anthropic import ChatAnthropic
+    from langchain_voyageai import VoyageAIEmbeddings
+    from langchain_core.prompts import ChatPromptTemplate
+    from langchain_core.runnables import RunnablePassthrough
+    from langchain_core.output_parsers import StrOutputParser
+    import tempfile
+except Exception as e:
+    st.error(f"Import failed: {e}")
+    st.stop()
 
 st.set_page_config(page_title="Lumen", page_icon="✨", layout="centered")
 
