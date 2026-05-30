@@ -21,10 +21,11 @@ st.markdown("""
 <style>
     .stApp {
         background:
-            radial-gradient(ellipse at 20% 30%, rgba(139, 92, 246, 0.18) 0%, transparent 50%),
-            radial-gradient(ellipse at 80% 70%, rgba(251, 191, 36, 0.15) 0%, transparent 50%),
-            radial-gradient(ellipse at 50% 100%, rgba(236, 72, 153, 0.10) 0%, transparent 60%),
-            #0A0A14;
+            linear-gradient(rgba(10, 10, 20, 0.55), rgba(10, 10, 20, 0.65)),
+            url("https://raw.githubusercontent.com/kayani21/lumen/main/background.jpg");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
     }
     .stApp::before {
         content: '';
