@@ -234,13 +234,20 @@ if uploaded_file and api_key:
         def format_docs(docs):
             return "\n\n".join(doc.page_content for doc in docs)
 
-        rag_chain = (
+        answer_chain = (
             {"context": retriever | format_docs, "question": RunnablePassthrough()}
             | prompt
             | llm
             | StrOutputParser()
         )
-        return rag_chain, len(chunks)
+
+        # Return both the answer and the source chunks
+        def answer_with_sources(question):
+            source_docs = retriever.invoke(question)
+            answer = answer_chain.invoke(question)
+            return answer, source_docs
+
+        return answer_with_sources, len(chunks)
 
     with st.spinner("✨ Reading your document..."):
         rag_chain, num_chunks = build_chain(pdf_path)
@@ -255,10 +262,16 @@ if uploaded_file and api_key:
         if question:
             with st.spinner("✨ Thinking..."):
                 try:
-                    answer = rag_chain.invoke(question)
+                    answer, sources = rag_chain(question)
                     st.session_state.question_count += 1
                     st.markdown("### Answer")
                     st.write(answer)
+
+                    with st.expander("📄 View the passages this answer came from"):
+                        for i, doc in enumerate(sources, 1):
+                            page = doc.metadata.get("page", "?")
+                            st.markdown(f"**Source {i}** (page {page})")
+                            st.caption(doc.page_content)
                 except Exception as e:
                     st.error(f"Something went wrong: {str(e)}")
     else:
